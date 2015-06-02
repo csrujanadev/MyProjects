@@ -1,0 +1,150 @@
+server:
+
+package GSP;
+
+import java.net.*;
+import java.io.*;
+import java.util.Scanner;
+
+public class GreetingServer extends Thread
+{
+   private ServerSocket serverSocket;
+   public GreetingServer(int port) throws IOException
+   {
+      serverSocket = new ServerSocket(port);
+      serverSocket.setSoTimeout(1000000000);
+   }
+
+   public void run()
+   {
+	   int wordLength=0;
+    
+	 try
+	 {
+        	 String word;
+        	 System.out.println("Waiting for client on port " +serverSocket.getLocalPort() + "...");
+             Socket server = serverSocket.accept();
+             System.out.println("Just connected to "+ server.getRemoteSocketAddress());
+             DataInputStream in = new DataInputStream(server.getInputStream());
+             DataOutputStream out = new DataOutputStream(server.getOutputStream());  
+        	
+             do{
+        	 
+            	 word = in.readUTF();
+            	 if(word=="fin")
+            	 {
+            		 
+            		 System.out.println("Server Closed");
+                     out.writeUTF(word);
+                     out.write(wordLength);
+                     server.close();
+            	 }
+            	 else{
+                wordLength+=word.length();           
+               	out.writeUTF(word.toUpperCase());
+             	out.write(wordLength);
+            	 }
+             }while(word!="FIN");
+        	 
+        	 System.out.println("Server Closed");
+             out.writeUTF(word);
+             out.write(wordLength);
+             server.close();
+	 }
+	 
+	 catch(SocketTimeoutException s)
+         {
+            System.out.println("Socket timed out!");
+            
+         }
+	 catch(IOException e)
+         {
+            e.printStackTrace();
+           
+         }
+     
+      
+      }
+   
+
+
+   public static void main(String [] args)
+   {
+      Scanner userInput = new Scanner(System.in);
+      
+       String port="6066";
+      
+      try
+       {
+         Thread t = new GreetingServer(Integer.parseInt(port));
+         t.start();
+       }
+      catch(IOException e)
+       {
+         e.printStackTrace();
+       }
+      userInput.close();
+   }
+}
+
+
+Client:
+package GSP;
+
+
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
+public class GreetingClient
+{
+   public static void main(String [] args)
+   {
+      Scanner userInput = new Scanner(System.in);
+    
+      String serverName="localhost";
+     // serverName = userInput.next();
+      String port="6066";
+      //port = userInput.next();
+      try
+      {
+    	 int wordLength=0; 
+    	 String word;
+         System.out.println("Connecting to " + serverName+ " on port " + port);
+         Socket client = new Socket(serverName, Integer.parseInt(port));
+         System.out.println("Just connected to : "+ client.getRemoteSocketAddress());
+         OutputStream outToServer = client.getOutputStream();
+         DataOutputStream out =new DataOutputStream(outToServer);
+         do
+        {
+        	System.out.println("Enter a sentence : ");
+        
+        	word = userInput.nextLine();
+            if(word=="fin")
+            {
+            	
+            	System.out.println("Totel Bytes recevied by server is: "+wordLength);
+            	client.close();
+            }
+            else
+            {
+            	out.writeUTF(word);
+            	InputStream inFromServer = client.getInputStream();
+            	DataInputStream in =new DataInputStream(inFromServer);
+            	word=in.readUTF();
+            	wordLength=in.read();
+            	System.out.println(word+" \n "+wordLength+" bytes received by server");
+            }
+        }while(word!="FIN");
+        client.close();
+             
+      }
+   catch(IOException e)
+   {
+      	e.printStackTrace();
+   }
+    
+   userInput.close();
+  
+}
+}

@@ -1,0 +1,24 @@
+<!--	Lab 3	-->
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<body>
+<p>hello : <%= Session("message").ToString%> </p>
+	<form action="CalcLoanServlet" method="get">
+            Loan Amount:     <input type="text" name="loanAmount"><br>
+            Annual Intrest:  <input type="text" name="annualIntrest"><br>
+            Number Of Years: <input type="text" name="numberOfYears"><br>
+            
+            <input type="submit" value="computeLoanPayment">
+            <input type="Reset" value="reset">
+            
+        </form>
+    </body>
+</body>
+
+</html>
